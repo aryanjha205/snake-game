@@ -34,6 +34,8 @@ let score = 0;
 
 let gulpSound = new Audio("gulp.mp3");
 
+let startX, startY; // Touch gesture coordinates
+
 // Initialize game
 function initializeGame() {
   headX = 10;
@@ -48,7 +50,6 @@ function initializeGame() {
   yVelocity = 0;
   score = 0;
   speed = 7;
-  gameOver = false;
 
   if (restartButton) {
     restartButton.remove(); // Remove restart button if it exists
@@ -230,6 +231,47 @@ function keyDown(event) {
     inputsYVelocity = 0;
     inputsXVelocity = 1;
   }
+}
+
+// Touch input for mobile
+canvas.addEventListener("touchstart", handleTouchStart, false);
+canvas.addEventListener("touchmove", handleTouchMove, false);
+
+function handleTouchStart(event) {
+  const touch = event.touches[0];
+  startX = touch.clientX;
+  startY = touch.clientY;
+}
+
+function handleTouchMove(event) {
+  if (!startX || !startY) return;
+
+  const touch = event.touches[0];
+  const deltaX = touch.clientX - startX;
+  const deltaY = touch.clientY - startY;
+
+  if (Math.abs(deltaX) > Math.abs(deltaY)) {
+    // Horizontal swipe
+    if (deltaX > 0 && inputsXVelocity !== -1) {
+      inputsXVelocity = 1;
+      inputsYVelocity = 0;
+    } else if (deltaX < 0 && inputsXVelocity !== 1) {
+      inputsXVelocity = -1;
+      inputsYVelocity = 0;
+    }
+  } else {
+    // Vertical swipe
+    if (deltaY > 0 && inputsYVelocity !== -1) {
+      inputsXVelocity = 0;
+      inputsYVelocity = 1;
+    } else if (deltaY < 0 && inputsYVelocity !== 1) {
+      inputsXVelocity = 0;
+      inputsYVelocity = -1;
+    }
+  }
+
+  startX = null;
+  startY = null; // Reset touch start coordinates
 }
 
 initializeGame();
